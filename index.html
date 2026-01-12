@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRECISE AGE TRACKER (BY RITESH ALONE)</title>
+    <style>
+        :root {
+            --primary-color: #00d2ff;
+            --secondary-color: #3a7bd5;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Background Image Source */
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: url('https://cdn-icons-png.flaticon.com/512/2991/2991148.png'); /* Logo Source */
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin: 0 auto 20px;
+            filter: drop-shadow(0 0 8px var(--primary-color));
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 0.8em;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 70px;
+            margin: 5px;
+            text-align: center;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            display: none; /* Hidden until calculation */
+        }
+
+        .age-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .age-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 10px;
+            border-radius: 12px;
+            animation: pulse 2s infinite alternate;
+        }
+
+        .age-val {
+            display: block;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .age-label {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            from { box-shadow: 0 0 5px rgba(255,255,255,0.1); }
+            to { box-shadow: 0 0 15px rgba(0, 210, 255, 0.3); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo"></div>
+    <h1>AGE CALCULATOR</h1>
+    <span class="subtitle">DESIGNED BY RITESH ALONE</span>
+
+    <div class="input-group">
+        <input type="number" id="day" placeholder="DD" min="1" max="31">
+        <input type="number" id="month" placeholder="MM" min="1" max="12">
+        <input type="number" id="year" placeholder="YYYY" min="1900">
+    </div>
+
+    <button onclick="startCalculating()">Track My Life</button>
+
+    <div id="result" class="result-container">
+        <h3>You have been alive for:</h3>
+        <div class="age-grid">
+            <div class="age-box"><span id="res-years" class="age-val">0</span><span class="age-label">Years</span></div>
+            <div class="age-box"><span id="res-months" class="age-val">0</span><span class="age-label">Months</span></div>
+            <div class="age-box"><span id="res-days" class="age-val">0</span><span class="age-label">Days</span></div>
+            <div class="age-box"><span id="res-hours" class="age-val">0</span><span class="age-label">Hours</span></div>
+            <div class="age-box"><span id="res-mins" class="age-val">0</span><span class="age-label">Minutes</span></div>
+            <div class="age-box"><span id="res-secs" class="age-val">0</span><span class="age-label">Seconds</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let timerInterval;
+
+    function startCalculating() {
+        // Clear any existing timer
+        if(timerInterval) clearInterval(timerInterval);
+
+        const d = parseInt(document.getElementById('day').value);
+        const m = parseInt(document.getElementById('month').value);
+        const y = parseInt(document.getElementById('year').value);
+
+        if(!d || !m || !y || d > 31 || m > 12) {
+            alert("Please enter a valid date!");
+            return;
+        }
+
+        const dob = new Date(y, m - 1, d);
+        
+        // Check if date is in the future
+        if(dob > new Date()) {
+            alert("Date of birth cannot be in the future!");
+            return;
+        }
+
+        document.getElementById('result').style.display = 'block';
+
+        // Update every second
+        timerInterval = setInterval(() => {
+            const now = new Date();
+            const diff = now - dob; // difference in milliseconds
+
+            const totalSeconds = Math.floor(diff / 1000);
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            const totalHours = Math.floor(totalMinutes / 60);
+            const totalDays = Math.floor(totalHours / 24);
+
+            // Calculate exact breakdown
+            let years = now.getFullYear() - dob.getFullYear();
+            let months = now.getMonth() - dob.getMonth();
+            let days = now.getDate() - dob.getDate();
+
+            if (days < 0) {
+                months--;
+                const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            // Display results
+            document.getElementById('res-years').innerText = years;
+            document.getElementById('res-months').innerText = months;
+            document.getElementById('res-days').innerText = days;
+            document.getElementById('res-hours').innerText = now.getHours();
+            document.getElementById('res-mins').innerText = now.getMinutes();
+            document.getElementById('res-secs').innerText = now.getSeconds();
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
